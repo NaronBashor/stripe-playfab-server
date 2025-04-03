@@ -42,10 +42,10 @@ app.post('/create-checkout-session', async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'subscription',
-            line_items: [{ price: 'your_price_id_here', quantity: 1 }],
+            line_items: [{ price: 'price_1R3hWM00hpkvgPMJXA6lYCqJ', quantity: 1 }],
             customer_email: email,
-            success_url: `https://yourdomain.com/success`,
-            cancel_url: `https://yourdomain.com/cancel`,
+            success_url: `https://splitrockgames.com/StripeSuccessPage`,
+            cancel_url: 'https://splitrockgames.com/tarkovto-do',
             metadata: { playFabId },
         });
         res.json({ url: session.url });
