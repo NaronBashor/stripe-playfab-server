@@ -21,8 +21,8 @@ app.post('/create-checkout-session', async (req, res) => {
                 quantity: 1,
             }],
             customer_email: email,
-            success_url: `https://yourdomain.com/success?playfabId=${playFabId}`,
-            cancel_url: 'https://yourdomain.com/cancel',
+            success_url: `https://stripe-playfab-server.onrender.com/success?playfabId=${playFabId}`,
+            cancel_url: 'https://stripe-playfab-server.onrender.com/cancel',
         });
 
         res.json({ url: session.url });
