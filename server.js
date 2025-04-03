@@ -7,38 +7,32 @@ require('dotenv').config();
 const app = express();
 
 // Stripe needs raw body for signature verification
-app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
+app.post('/create-checkout-session', async (req, res) => {
+    const { email, playFabId } = req.body;
+    console.log("Received checkout creation request:", { email, playFabId }); // <--- ADD THIS
 
-    let event;
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            line_items: [{
+                price: 'price_1R3hWM00hpkvgPMJXA6lYCqJ',
+                quantity: 1,
+            }],
+            customer_email: email,
+            success_url: `https://splitrockgames.com/StripeSuccessPage`,
+            cancel_url: 'https://splitrockgames.com/tarkovto-do',
+            subscription_data: {
+                metadata: {
+                    playFabId: playFabId
+                }
+            }
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    // Handle the event
-    if (event.type === 'invoice.payment_succeeded') {
-        const invoice = event.data.object;
-
-        try {
-            const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-
-            const customerEmail = invoice.customer_email;
-            const playFabId = subscription.metadata?.playFabId;
-
-            console.log(`Payment succeeded for: ${customerEmail}`);
-            console.log(`PlayFab ID (from metadata): ${playFabId}`);
-
-            await updatePlayFabSubscription(playFabId);
-
-        } catch (subError) {
-            console.error(`Failed to fetch subscription metadata: ${subError.message}`);
-        }
-    }
-
-    res.json({ received: true });
 });
 
 // Everything else (body parser comes AFTER)
