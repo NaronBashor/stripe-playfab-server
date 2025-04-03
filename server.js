@@ -59,7 +59,6 @@ app.post('/create-checkout-session', async (req, res) => {
             customer_email: email,
             success_url: 'https://splitrockgames.com/StripeSuccessPage',
             cancel_url: 'https://splitrockgames.com/tarkovto-do',
-            const customerId = invoice.customer,
             subscription_data: {
                 metadata: { playFabId }
             }
