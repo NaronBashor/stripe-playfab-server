@@ -30,7 +30,7 @@ app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), as
             console.log(`Payment succeeded for: ${customerEmail}`);
             console.log(`PlayFab ID: ${playFabId}`);
 
-            await updatePlayFabSubscription(playFabId);
+            await updatePlayFabSubscription(playFabId, invoice.customer);
         } catch (err) {
             console.error(`Failed to process subscription: ${err.message}`);
         }
@@ -71,9 +71,9 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 });
 
-async function updatePlayFabSubscription(playFabId) {
-    if (!playFabId) {
-        console.warn("⚠No PlayFab ID provided, skipping update.");
+async function updatePlayFabSubscription(playFabId, stripeCustomerId) {
+    if (!playFabId || !stripeCustomerId) {
+        console.warn("⚠ Missing playFabId or stripeCustomerId.");
         return;
     }
 
@@ -83,7 +83,7 @@ async function updatePlayFabSubscription(playFabId) {
             {
                 PlayFabId: playFabId,
                 Data: {
-                    StripeCustomerId,
+                    StripeCustomerId: stripeCustomerId,
                     SubscriptionStatus: "active",
                     Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
                 }
@@ -96,9 +96,9 @@ async function updatePlayFabSubscription(playFabId) {
             }
         );
 
-        console.log("PlayFab updated:", response.data);
+        console.log("✅ PlayFab updated:", response.data);
     } catch (err) {
-        console.error("Failed to update PlayFab:", err.response?.data || err.message);
+        console.error("❌ Failed to update PlayFab:", err.response?.data || err.message);
     }
 }
 
