@@ -32,7 +32,7 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 // Webhook endpoint to handle Stripe events
-app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), (req, res) => {
+app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     let event;
@@ -45,13 +45,15 @@ app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), (r
 
     // Handle the event
     if (event.type === 'invoice.payment_succeeded') {
-  const subscription = event.data.object;
-  const customerEmail = subscription.customer_email;
-  const playFabId = subscription.metadata?.playFabId;
+        const subscription = event.data.object;
+        const customerEmail = subscription.customer_email;
+        const playFabId = subscription.metadata?.playFabId;
 
-  console.log(`✅ Payment succeeded for: ${customerEmail}`);
-  console.log(`🧾 PlayFab ID (from metadata): ${playFabId}`);
-}
+        console.log(`✅ Payment succeeded for: ${customerEmail}`);
+        console.log(`🧾 PlayFab ID (from metadata): ${playFabId}`);
+
+        await updatePlayFabSubscription(playFabId);
+    }
 
     res.json({ received: true });
 });
