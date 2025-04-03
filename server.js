@@ -21,7 +21,7 @@ app.post('/create-checkout-session', async (req, res) => {
                 quantity: 1,
             }],
             customer_email: email,
-            success_url: `https://splitrockgames.com/tarkovto-do`,
+            success_url: `https://splitrockgames.com/StripeSuccessPage`,
             cancel_url: 'https://splitrockgames.com/tarkovto-do',
         });
 
