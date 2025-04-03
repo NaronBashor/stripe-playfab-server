@@ -59,6 +59,7 @@ app.post('/create-checkout-session', async (req, res) => {
             customer_email: email,
             success_url: 'https://splitrockgames.com/StripeSuccessPage',
             cancel_url: 'https://splitrockgames.com/tarkovto-do',
+            const customerId = invoice.customer,
             subscription_data: {
                 metadata: { playFabId }
             }
@@ -100,6 +101,22 @@ async function updatePlayFabSubscription(playFabId) {
         console.error("Failed to update PlayFab:", err.response?.data || err.message);
     }
 }
+
+app.post('/create-customer-portal-session', async (req, res) => {
+    const { customerId } = req.body;
+
+    try {
+        const session = await stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: 'https://splitrockgames.com/tarkovto-do'
+        });
+
+        res.json({ url: session.url });
+    } catch (err) {
+        console.error("Failed to create portal session:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
 
 const PORT = process.env.PORT || 4242;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
