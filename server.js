@@ -79,7 +79,7 @@ async function updatePlayFabSubscription(playFabId) {
 
     try {
         const response = await axios.post(
-            'https://YOUR_TITLE_ID.playfabapi.com/Admin/UpdateUserInternalData',
+            'https://16B37C.playfabapi.com/Admin/UpdateUserInternalData',
             {
                 PlayFabId: playFabId,
                 Data: {
