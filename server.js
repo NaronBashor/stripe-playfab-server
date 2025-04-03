@@ -7,7 +7,7 @@ require('dotenv').config();
 const app = express();
 
 // Stripe needs raw body for signature verification
-app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), (req, res) => {
+app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     let event;
@@ -18,14 +18,24 @@ app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), (r
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Handle the event
     if (event.type === 'invoice.payment_succeeded') {
-        const subscription = event.data.object;
-        const customerEmail = subscription.customer_email;
-        const playFabId = subscription.metadata?.playFabId;
+        const invoice = event.data.object;
 
-        console.log(`Payment succeeded for: ${customerEmail}`);
-        console.log(`PlayFab ID (from metadata): ${playFabId}`);
-        // Optionally call your updatePlayFabSubscription here
+        try {
+            const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+
+            const customerEmail = invoice.customer_email;
+            const playFabId = subscription.metadata?.playFabId;
+
+            console.log(`Payment succeeded for: ${customerEmail}`);
+            console.log(`PlayFab ID (from metadata): ${playFabId}`);
+
+            await updatePlayFabSubscription(playFabId);
+
+        } catch (subError) {
+            console.error(`Failed to fetch subscription metadata: ${subError.message}`);
+        }
     }
 
     res.json({ received: true });
@@ -60,6 +70,37 @@ app.post('/create-checkout-session', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+const axios = require('axios');
+
+async function updatePlayFabSubscription(playFabId) {
+    if (!playFabId) {
+        console.warn("No PlayFab ID found, skipping update.");
+        return;
+    }
+
+    try {
+        const result = await axios.post(
+            `https://YOUR_TITLE_ID.playfabapi.com/Admin/UpdateUserInternalData`,
+            {
+                PlayFabId: playFabId,
+                Data: {
+                    SubscriptionStatus: "active",
+                    Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            },
+            {
+                headers: {
+                    'X-SecretKey': process.env.PLAYFAB_SECRET_KEY,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log("PlayFab updated:", result.data);
+    } catch (err) {
+        console.error("Failed to update PlayFab:", err.response?.data || err.message);
+    }
+}
 
 const PORT = process.env.PORT || 4242;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
