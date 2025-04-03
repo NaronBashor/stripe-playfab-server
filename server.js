@@ -79,13 +79,13 @@ async function updatePlayFabSubscription(playFabId, stripeCustomerId) {
 
     try {
         const response = await axios.post(
-  'https://16B37C.playfabapi.com/Admin/UpdateUserData',
+  'https://16B37C.playfabapi.com/Client/UpdateUserData',
   {
     PlayFabId: playFabId,
     Data: {
+      StripeCustomerId,
       SubscriptionStatus: "active",
-      Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      StripeCustomerId: stripeCustomerId
+      Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     }
   },
   {
