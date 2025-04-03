@@ -17,7 +17,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_method_types: ['card'],
             mode: 'subscription',
             line_items: [{
-                price: 'prod_S3hs9lukCXXYLW',
+                price: 'price_1R9aSx00hpkvgPMJSsf0WHsI',
                 quantity: 1,
             }],
             customer_email: email,
