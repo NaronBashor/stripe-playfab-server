@@ -45,13 +45,13 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (req, res) =>
 
     // Handle the event
     if (event.type === 'invoice.payment_succeeded') {
-        const subscription = event.data.object;
-        const customerEmail = subscription.customer_email;
-        const playFabId = subscription.metadata.playFabId;
+  const subscription = event.data.object;
+  const customerEmail = subscription.customer_email;
+  const playFabId = subscription.metadata?.playFabId;
 
-        // Update PlayFab with subscription status
-        // Implement PlayFab API call here
-    }
+  console.log(`✅ Payment succeeded for: ${customerEmail}`);
+  console.log(`🧾 PlayFab ID (from metadata): ${playFabId}`);
+}
 
     res.json({ received: true });
 });
