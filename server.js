@@ -79,22 +79,22 @@ async function updatePlayFabSubscription(playFabId, stripeCustomerId) {
 
     try {
         const response = await axios.post(
-            'https://16B37C.playfabapi.com/Admin/UpdateUserInternalData',
-            {
-                PlayFabId: playFabId,
-                Data: {
-                    StripeCustomerId: stripeCustomerId,
-                    SubscriptionStatus: "active",
-                    Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                }
-            },
-            {
-                headers: {
-                    'X-SecretKey': process.env.PLAYFAB_SECRET_KEY,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+  'https://16B37C.playfabapi.com/Admin/UpdateUserData',
+  {
+    PlayFabId: playFabId,
+    Data: {
+      SubscriptionStatus: "active",
+      Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      StripeCustomerId: stripeCustomerId
+    }
+  },
+  {
+    headers: {
+      'X-SecretKey': process.env.PLAYFAB_SECRET_KEY,
+      'Content-Type': 'application/json'
+    }
+  }
+);
 
         console.log("✅ PlayFab updated:", response.data);
     } catch (err) {
