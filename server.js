@@ -40,14 +40,21 @@ app.post('/create-checkout-session', async (req, res) => {
     const { email, playFabId } = req.body;
     try {
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'subscription',
-            line_items: [{ price: 'price_1R3hWM00hpkvgPMJXA6lYCqJ', quantity: 1 }],
-            customer_email: email,
-            success_url: `https://splitrockgames.com/StripeSuccessPage`,
-            cancel_url: 'https://splitrockgames.com/tarkovto-do',
-            metadata: { playFabId },
-        });
+  payment_method_types: ['card'],
+  mode: 'subscription',
+  line_items: [{
+    price: 'price_1R3hWM00hpkvgPMJXA6lYCqJ',
+    quantity: 1,
+  }],
+  customer_email: email,
+  success_url: `https://splitrockgames.com/StripeSuccessPage`,
+  cancel_url: 'https://splitrockgames.com/tarkovto-do',
+  subscription_data: {
+    metadata: {
+      playFabId: playFabId
+    }
+  }
+});
         res.json({ url: session.url });
     } catch (error) {
         res.status(500).json({ error: error.message });
